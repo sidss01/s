@@ -5,51 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Karaoke Application</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            padding: 20px;
-        }
-        #song-list {
-            margin: 20px 0;
-        }
-        audio {
-            margin: 10px 0;
-        }
+        body { font-family: Arial, sans-serif; }
+        #songSelector, #lyricsDisplay, #audioPlayer, #recordingControl { margin: 20px; }
     </style>
 </head>
 <body>
     <h1>Karaoke Application</h1>
-    <div id="song-list">
-        <h2>Choose a song</h2>
+    <div id="songSelector">
+        <label for="songs">Select a song:</label>
         <select id="songs">
-            <option value="">Select a song</option>
-            <option value="song1.mp3">Song 1</option>
-            <option value="song2.mp3">Song 2</option>
-            <option value="song3.mp3">Song 3</option>
+            <option value="song1">Song 1</option>
+            <option value="song2">Song 2</option>
+            <option value="song3">Song 3</option>
         </select>
-        <button id="play">Play</button>
-        <button id="pause">Pause</button>
+        <button onclick="loadSong()">Load Song</button>
     </div>
-    <audio id="audio" controls></audio>
-
+    <div id="lyricsDisplay">
+        <h2>Lyrics</h2>
+        <p id="lyrics">Select a song to see the lyrics.</p>
+    </div>
+    <div id="audioPlayer">
+        <audio id="audio" controls>
+            <source id="audioSource" src="" type="audio/mpeg">
+            Your browser does not support the audio tag.
+        </audio>
+    </div>
+    <div id="recordingControl">
+        <button onclick="startRecording()">Start Recording</button>
+        <button onclick="stopRecording()">Stop Recording</button>
+    </div>
     <script>
-        const songs = document.getElementById('songs');
-        const audio = document.getElementById('audio');
-
-        document.getElementById('play').onclick = function() {
-            if (songs.value) {
-                audio.src = songs.value;
-                audio.play();
-            } else {
-                alert('Please select a song.');
-            }
+        const songs = {
+            song1: { lyrics: 'Lyrics for Song 1...', audio: 'path/to/song1.mp3' },
+            song2: { lyrics: 'Lyrics for Song 2...', audio: 'path/to/song2.mp3' },
+            song3: { lyrics: 'Lyrics for Song 3...', audio: 'path/to/song3.mp3' }
         };
 
-        document.getElementById('pause').onclick = function() {
-            audio.pause();
-        };
+        function loadSong() {
+            const songSelect = document.getElementById('songs');
+            const selectedSong = songSelect.value;
+            document.getElementById('lyrics').innerText = songs[selectedSong].lyrics;
+            const audio = document.getElementById('audio');
+            const audioSource = document.getElementById('audioSource');
+            audioSource.src = songs[selectedSong].audio;
+            audio.load();
+        }
+
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'recording.webm';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                };
+                mediaRecorder.start();
+            });
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+        }
     </script>
 </body>
 </html>

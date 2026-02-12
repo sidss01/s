@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karaoke Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        #song-list {
+            margin: 20px 0;
+        }
+        audio {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Karaoke Application</h1>
+    <div id="song-list">
+        <h2>Choose a song</h2>
+        <select id="songs">
+            <option value="">Select a song</option>
+            <option value="song1.mp3">Song 1</option>
+            <option value="song2.mp3">Song 2</option>
+            <option value="song3.mp3">Song 3</option>
+        </select>
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+    </div>
+    <audio id="audio" controls></audio>
+
+    <script>
+        const songs = document.getElementById('songs');
+        const audio = document.getElementById('audio');
+
+        document.getElementById('play').onclick = function() {
+            if (songs.value) {
+                audio.src = songs.value;
+                audio.play();
+            } else {
+                alert('Please select a song.');
+            }
+        };
+
+        document.getElementById('pause').onclick = function() {
+            audio.pause();
+        };
+    </script>
+</body>
+</html>
